@@ -2,33 +2,38 @@
 pragma solidity ^0.8.9;
 
 interface ISereeServiceManager {
-    event NewTaskCreated(uint32 indexed taskIndex, Task task);
 
-    event TaskResponded(uint32 indexed taskIndex, Task task, address operator);
-
-    struct Task {
-        string name;
-        uint32 taskCreatedBlock;
+    struct Order {
+        bytes32 uuid;
+        uint32 orderCreatedBlock;
+        Status status;
+        Token token;
     }
 
-    function latestTaskNum() external view returns (uint32);
+    enum Status {
+        Paid, 
+        Unpaid
+    }
 
-    function allTaskHashes(
-        uint32 taskIndex
-    ) external view returns (bytes32);
+    enum Token {
+        sBWP,
+        sKES,
+        sNGN,
+        sGHS
+    }
 
-    function allTaskResponses(
-        address operator,
-        uint32 taskIndex
-    ) external view returns (bytes memory);
+    event OrderPlaced(bytes32 indexed uuid);
+    event Payout(bytes32 indexed uuid);
 
-    function createNewTask(
-        string memory name
-    ) external returns (Task memory);
+    function latestOrderUuid() external view returns (uint32);
 
-    function respondToTask(
-        Task calldata task,
-        uint32 referenceTaskIndex,
-        bytes calldata signature
+    function createNewOrder(
+        bytes32 _uuid
+    ) external payable;
+
+    function notarizeOrder(
+        bytes32 _uuid,
+        bytes calldata signature,
+        bytes32 message_hash
     ) external;
 }
