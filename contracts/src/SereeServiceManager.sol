@@ -8,13 +8,13 @@ import {IServiceManager} from "@eigenlayer-middleware/src/interfaces/IServiceMan
 import {ECDSAUpgradeable} from
     "@openzeppelin-upgrades/contracts/utils/cryptography/ECDSAUpgradeable.sol";
 import {IERC1271Upgradeable} from "@openzeppelin-upgrades/contracts/interfaces/IERC1271Upgradeable.sol";
-import {IHelloWorldServiceManager} from "./IHelloWorldServiceManager.sol";
+import {ISereeServiceManager} from "./ISereeServiceManager.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 /**
- * @title Primary entrypoint for procuring services from HelloWorld.
+ * @title Primary entrypoint for procuring services from Sereé (https://seree.xyz).
  * @author Eigen Labs, Inc.
  */
 contract HelloWorldServiceManager is ECDSAServiceManagerBase, IHelloWorldServiceManager {
