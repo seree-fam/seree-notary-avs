@@ -25,7 +25,7 @@ interface ISereeServiceManager {
     event OrderPlaced(bytes32 indexed uuid);
     event Payout(bytes32 indexed uuid);
 
-    function latestOrderUuid() external view returns (uint32);
+    function latestOrderUuid() external view returns (bytes32);
 
     function createNewOrder(
         bytes32 _uuid

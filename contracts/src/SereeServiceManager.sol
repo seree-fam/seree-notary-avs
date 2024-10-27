@@ -20,16 +20,16 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
     using ECDSAUpgradeable for bytes32;
 
-    uint32 public latestTaskNum;
+    bytes32 public latestOrderUuid;
 
     // mapping of task indices to all tasks hashes
     // when a task is created, task hash is stored here,
     // and responses need to pass the actual task,
     // which is hashed onchain and checked against this mapping
-    mapping(uint32 => bytes32) public allTaskHashes;
+    // mapping(uint32 => bytes32) public allTaskHashes;
 
     // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
-    mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
+    // mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
 
     modifier onlyOperator() {
         require(
