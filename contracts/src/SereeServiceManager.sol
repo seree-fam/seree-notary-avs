@@ -17,7 +17,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
  * @title Primary entrypoint for procuring services from Sereé (https://seree.xyz).
  * @author Eigen Labs, Inc.
  */
-contract HelloWorldServiceManager is ECDSAServiceManagerBase, IHelloWorldServiceManager {
+contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
     using ECDSAUpgradeable for bytes32;
 
     uint32 public latestTaskNum;
