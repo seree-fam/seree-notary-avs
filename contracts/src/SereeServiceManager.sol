@@ -27,10 +27,8 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
 
     bytes32 public latestOrderUuid;
 
-    address constant sBWP_ADDRESS = 0x1234567890abcdef1234567890abcdef12345678;
-    address constant sKES_ADDRESS = 0xabcdef1234567890abcdef1234567890abcdef12;
-    address constant sNGN_ADDRESS = 0x7890abcdef1234567890abcdef1234567890abcd;
-    address constant sGHS_ADDRESS = 0xef1234567890abcdef1234567890abcdef1234;
+    mapping(uint256 => Order) public orders;
+    mapping(uint256 => uint256) public escrowBalances;
 
     // mapping of task indices to all tasks hashes
     // when a task is created, task hash is stored here,
@@ -53,7 +51,11 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
         address _avsDirectory,
         address _stakeRegistry,
         address _rewardsCoordinator,
-        address _delegationManager
+        address _delegationManager,
+        address sBWP_ADDR,
+        address sKES_ADDR,
+        address sNGN_ADDR,
+        address sGHS_ADDR
     )
         ECDSAServiceManagerBase(
             _avsDirectory,
@@ -61,7 +63,12 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
             _rewardsCoordinator,
             _delegationManager
         )
-    {}
+    {
+        sBWP_ADDRESS = sBWP_ADDR;
+        sKES_ADDRESS = sKES_ADDR;
+        sNGN_ADDRESS = sNGN_ADDR;
+        sGHS_ADDRESS = sGHS_ADDR;
+    }
 
     /* FUNCTIONS */
     function latestOrderUuid() external view returns (bytes32) {
@@ -76,6 +83,7 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
         require(amount > 0, "Amount must be greater than 0");
 
         address tokenAddress;
+        latestOrderUuid = _uuid;
 
         if (token == Token.sBWP) {
             tokenAddress = sBWP_ADDRESS;
@@ -95,7 +103,24 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
         );
         require(allowance >= amount, "Insufficient allowance");
 
+        Order memory newOrder = Order({
+            uuid: _uuid,
+            orderCreatedBlock: uint32(block.number),
+            status: Status.Unpaid,
+            token: token
+        });
         
+        orders[uint256(_uuid)] = newOrder;
+        escrowBalances[uint256(_uuid)] = amount;
+
+        bool success = IERC20(tokenAddress).transferFrom(
+            msg.sender,
+            address(this),
+            amount
+        );
+        require(success, "Transfer failed");
+
+        emit OrderPlaced(_uuid);
     }
 
     function notarizeOrder(
