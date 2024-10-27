@@ -28,7 +28,9 @@ interface ISereeServiceManager {
     function latestOrderUuid() external view returns (bytes32);
 
     function createNewOrder(
-        bytes32 _uuid
+        bytes32 _uuid, 
+        Token token,
+        uint256 amount
     ) external payable;
 
     function notarizeOrder(
