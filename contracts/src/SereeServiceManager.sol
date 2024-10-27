@@ -55,6 +55,19 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
     {}
 
     /* FUNCTIONS */
+    function latestOrderUuid() external view returns (bytes32) {
+        return latestOrderUuid;
+    }
+
+    function createNewOrder(
+        bytes32 _uuid
+    ) external payable;
+
+    function notarizeOrder(
+        bytes32 _uuid,
+        bytes calldata signature,
+        bytes32 message_hash
+    ) external;
     // NOTE: this function creates new task, assigns it a taskId
     function createNewTask(
         string memory name
