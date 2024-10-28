@@ -2,7 +2,7 @@ use SereeServiceManager::Task;
 use alloy_sol_types::{sol, SolEvent};
 use once_cell::sync::Lazy;
 use std::{env, str::FromStr};
-
+use notary_server::{NotarizationProperties, run_server};
 
 
 sol!(
@@ -38,3 +38,4 @@ static AVS_DIRECTORY_CONTRACT_ADDRESS: Lazy<String> = Lazy::new(|| {
     env::var("HOLESKY_AVS_DIRECTORY_ADDRESS")
         .expect("failed to get delegation manager contract address from env")
 });
+

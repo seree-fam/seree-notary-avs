@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 alloy = { version = "0.5.4", features = ["full"] }
 once_cell = "1.20.2"
+notary-server = { git = "https://github.com/seree-fam/tlsn.git" }
