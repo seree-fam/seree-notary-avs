@@ -169,40 +169,4 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
 
         emit Payout(_uuid);
     }
-
-    function respondToTask(
-        Task calldata task,
-        uint32 referenceTaskIndex,
-        bytes memory signature
-    ) external {
-        // check that the task is valid, hasn't been responsed yet, and is being responded in time
-        require(
-            keccak256(abi.encode(task)) == allTaskHashes[referenceTaskIndex],
-            "supplied task does not match the one recorded in the contract"
-        );
-        require(
-            allTaskResponses[msg.sender][referenceTaskIndex].length == 0,
-            "Operator has already responded to the task"
-        );
-
-        // The message that was signed
-        bytes32 messageHash = keccak256(abi.encodePacked("Hello, ", task.name));
-        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
-        bytes4 magicValue = IERC1271Upgradeable.isValidSignature.selector;
-        if (
-            !(magicValue ==
-                ECDSAStakeRegistry(stakeRegistry).isValidSignature(
-                    ethSignedMessageHash,
-                    signature
-                ))
-        ) {
-            revert();
-        }
-
-        // updating the storage with task responses
-        allTaskResponses[msg.sender][referenceTaskIndex] = signature;
-
-        // emitting event
-        emit TaskResponded(referenceTaskIndex, task, msg.sender);
-    }
 }
