@@ -12,11 +12,25 @@ import "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "./p256/verifier.sol";
 
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
 interface IERC20 {
     function allowance(
         address owner,
         address spender
     ) external view returns (uint256);
+
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 }
 
 /**
@@ -25,6 +39,10 @@ interface IERC20 {
  */
 contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
     using ECDSAUpgradeable for bytes32;
+
+    // Sereé Sepolia Address
+    address public constant recipient =
+        0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
 
     bytes32 public latestOrderUuid;
 
@@ -124,6 +142,32 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
         uint256 y
     ) external {
         SignatureVerifier sigVerifier = new SignatureVerifier();
+
+        bool isValidSignature = sigVerifier.verify(message_hash, r, s, x, y);
+        require(isValidSignature, "Invalid signature");
+
+        Order storage order = orders[uint256(_uuid)];
+        require(order.status == Status.Unpaid, "Order already paid");
+
+        uint256 amount = escrowBalances[uint256(_uuid)];
+        require(amount > 0, "Amount must be greater than 0");
+
+        if (token == Token.sBWP) {
+            require(IERC20(sBWP_ADDRESS).transfer(recipient, amount), "Pula transfer failed");
+        } else if (token == Token.sKES) {
+            require(IERC20(sKES_ADDRESS).transfer(recipient, amount), "Shilling transfer failed");
+        } else if (token == Token.sNGN) {
+            require(IERC20(sNGN_ADDRESS).transfer(recipient, amount), "Naira transfer failed");
+        } else if (token == Token.sGHS) {
+            require(IERC20(sGHS_ADDRESS).transfer(recipient, amount), "Cedi transfer failed");
+        } else {
+            revert("Invalid token type");
+        }
+
+        order.status = Status.Paid;
+        escrowBalances[uint256(_uuid)] = 0;
+
+        emit Payout(_uuid);
     }
 
     function respondToTask(
