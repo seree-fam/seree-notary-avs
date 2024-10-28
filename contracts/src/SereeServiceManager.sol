@@ -10,6 +10,7 @@ import {ISereeServiceManager} from "./ISereeServiceManager.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "./p256/verifier.sol";
 
 interface IERC20 {
     function allowance(
@@ -29,15 +30,6 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
 
     mapping(uint256 => Order) public orders;
     mapping(uint256 => uint256) public escrowBalances;
-
-    // mapping of task indices to all tasks hashes
-    // when a task is created, task hash is stored here,
-    // and responses need to pass the actual task,
-    // which is hashed onchain and checked against this mapping
-    // mapping(uint32 => bytes32) public allTaskHashes;
-
-    // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
-    // mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
 
     modifier onlyOperator() {
         require(
@@ -125,23 +117,13 @@ contract SereeServiceManager is ECDSAServiceManagerBase, ISereeServiceManager {
 
     function notarizeOrder(
         bytes32 _uuid,
-        bytes calldata signature,
-        bytes32 message_hash
-    ) external;
-
-    // NOTE: this function creates new task, assigns it a taskId
-    function createNewTask(string memory name) external returns (Task memory) {
-        // create a new task struct
-        Task memory newTask;
-        newTask.name = name;
-        newTask.taskCreatedBlock = uint32(block.number);
-
-        // store hash of task onchain, emit event, and increase taskNum
-        allTaskHashes[latestTaskNum] = keccak256(abi.encode(newTask));
-        emit NewTaskCreated(latestTaskNum, newTask);
-        latestTaskNum = latestTaskNum + 1;
-
-        return newTask;
+        bytes32 message_hash,
+        uint256 r,
+        uint256 s,
+        uint256 x,
+        uint256 y
+    ) external {
+        SignatureVerifier sigVerifier = new SignatureVerifier();
     }
 
     function respondToTask(
